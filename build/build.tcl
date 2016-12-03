@@ -327,6 +327,12 @@ expect ":KILL"
 respond "*" ":link teach;ts emacs,emacs;tstch >\r"
 type ":vk\r"
 
+# info
+respond "*" "info\033\023"
+respond "*" ":emacs\r"
+expect ":KILL"
+respond "*" ":link sys2;ts info,emacs;tsinfo >\r"
+
 # nsalv, timesharing version
 respond "*" ":midas sys1;_kshack;nsalv\r"
 respond "machine?" "TS\r"
