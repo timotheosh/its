@@ -102,6 +102,7 @@ Some major applications:
 - C10, C compiler
 - DDT, debugger
 - Emacs, editor
+- Logo, programming language
 - Mac Hack VI and Tech II, chess programs
 - Maclisp, interpreter and compiler
 - Muddle, interpreter
