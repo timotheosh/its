@@ -1024,3 +1024,7 @@ respond "*" ":move sysbin;@ boot11, .;\r"
 # STUFF
 respond "*" ":midas sys1;ts stuff_sysen2;stuff\r"
 expect ":KILL"
+
+# MONIT
+respond "*" ":midas sys;ts monit_syseng;monit\r"
+expect ":KILL"
