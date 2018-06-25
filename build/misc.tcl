@@ -422,6 +422,10 @@ respond "\n" "TTY==120\r"
 respond "\n" "DIS==130\r\003"
 expect ":KILL"
 
+# PI
+respond "*" ":midas sys3;ts pi_rwg; ran\r"
+expect ":KILL"
+
 # Hunt the Wumpus
 respond "*" ":midas sys1;ts wumpus_games; wumpus\r"
 expect ":KILL"
