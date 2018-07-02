@@ -21,7 +21,7 @@
 	nplyrs==4	;# of players
 
 
-DEFINE SETF TEXT,FLG	;useful set-flag macro!
+DEFINE SETF TEXT,FLG		;useful set-flag macro!
 IFDEF FLG,.STOP
 .TAG FOOBAR
 PRINTC "TEXT
@@ -119,6 +119,7 @@ aprchn==4	;processor has highest priority pi channel
 dspchn==5	;special interrupt channel for display
 dischn==6	;normal 'done' channel for display
 imxchn==7	;IMX data channel (pots)
+imx==574
 ..d574==574
 
 aprpic==bit1.3	;channels as represented in PI condition word
@@ -156,10 +157,11 @@ cpi1.5==4.7123889
 PIE:	3.1415926535
 PI$2:	6.2831853072
 PI.5:	1.5707963
+
 
 	subttl Macro definitions
 maxflo:	377777,,-1	;maximum floating point value
-JOV=<jfcl 10,>	;jump on overflow
+JOV=<jfcl 10,>		;jump on overflow
 
 DEFINE PFMPR ac,loc
 	jov .+1
@@ -257,7 +259,7 @@ intcal:	push p,c
 	fsbr b,M2	;M1-M2
 		;(b)=M1-M2 (c)=B1 (d)=B2 (e)=M1
 	trnn f,%m1inf+%m2inf	;either infinite?
-	jrst intrs2	;no, normal crunching.
+	jrst intrs2		;no, normal crunching.
 	setz a, 
 	trne f,%m1inf
 	jrst [trne f,%m2inf	;1st infinite, 2nd also?
@@ -266,13 +268,13 @@ intcal:	push p,c
 		move b,M2
 		fmpr b,X1
 		fadr b,d	;Y=B2+M*X1
-		move b,d	;X=X1, Y=B2 If M1 infinite
+;		move b,d	;X=X1, Y=B2 If M1 infinite
 		jrst intrs7]	 
 	move a,X2
 	move b,X2
 	fmpr b,M1
 	fadr b,c
-	move b,c	;X=X2, Y=B1 if M2 infinite
+;	move b,c		;X=X2, Y=B1 if M2 infinite
 	jrst intrs7
 
 intrs2:	jumpe b,intrs9	;if M1-M2 then lines parallel
@@ -335,7 +337,7 @@ aprbrk:	0
 	move ia,steptm	;get # tics per game step
 	movem ia,clkcnt	;and reset count.
 aprbr1:	cono apr,a%cceo+A%clkz+aprchn	;turn off clock flag and make sure enabled
-	jrst 12,@aprbrk	;and dismiss interrupt
+	jrst 12,@aprbrk		;and dismiss interrupt
 
 aprbr2:	movem ia,aprcns
 	jsr death	;for time being, all non-clock ints are no-no's...
@@ -366,7 +368,7 @@ TSINT:	0
 IFE $ITS,[
 DISBRK:	0
 DISBR0:	TRNN DL,-1	;ADDR OF NEXT ITEM IN RH?
-	 MOVE DL,DISLST	;NO, GET PTR TO BEG OF CURRENT DIREST
+	 MOVE DL,DISLST	;NO, GET PTR TO BEG OF CURRENT DISLIST
 	MOVE DL,(DL)	;GET ITEM
 	HLRZ DP,DL	;GET ADDR OF BLKO PTR FOR ITEM
 	JUMPE DP,DISBR0	;NOTHING THERE, GET NEXT ITEM
@@ -375,10 +377,10 @@ DISBR0:	TRNN DL,-1	;ADDR OF NEXT ITEM IN RH?
 	JRST 12,@DISBRK	;RETURN
 
 
-DSPBRK:	0	;SPECIAL DISPLAY INTERRUPT
+DSPBRK:	0		;SPECIAL DISPLAY INTERRUPT
 ;       HLRZ DP,DL	;GET ADDR OF BLKO THAT INTERRUPTED
 ;       CAIN DP,BKPT1	;IF WAS DOING FIRST BACKGROUND,
-;	MOVE DL,(DL)	;SKIP NEXT (2ND BACKGNO) ITEM.
+;	 MOVE DL,(DL)	;SKIP NEXT (2ND BACKGND) ITEM.
 DSPBR1:	TRNN DL,-1
 	 MOVE DL,DISLST 
 	MOVE DL,(DL)
@@ -426,12 +428,13 @@ vbfend:	pushj p,disran	;display random stuffs
 	ADDI A,1
 	HRRZM A,VDLIPT
 	POPJ P,
+
 
 	subttl main program
 	;one time initialization
 go:	move p,pdl
 IFE $ITS,[
-	cono apr,a%STRT+aprchn	;clear all APR flags and i/o
+	cono apr,a%STRT+aprchn		;clear all APR flags and i/o
 	cono apr,a%cceo+aprchn	;enable clock ints
 	cono 420,40	;enable 36-bit input array
 	cono pi,p%clr+p%cenb+p%on+aprpic+dispic+dsppic	;PI reset+assignments
@@ -564,7 +567,7 @@ tstfir:	move a,pwb	;note that pwb may have changed...this is the idea.
 	trz f,%zfire	;clear flag otherwise
 
 	movsi plr,-nplyrs
-gamlp1:	pushj p,plrdis	;display new position etc.
+gamlp1:	pushj p,plrdis		;display new position etc.
 	aobjn plr,gamlp1
 
 	trnn f,%zfire	;now see if beam was fired
@@ -617,6 +620,7 @@ zlup1:	hrrz a,plr	;get # of player being checked
 
 zlup2:	pushj p,angchk
 	jrst zlup50	;not pointing in right direction
+
 	trne f,%lnchk
 	jrst zlup25	;skip hit-it check if doing boundaries
 	move c,plocx(plr)	;see if intersction is close enough to player to hit him
@@ -690,7 +694,7 @@ zlup90:	move a,zstrtx
 	jrst gamlup	;no, back to game.
 	movei plr,-4(plr)	;adjust index (not pointing into player tables now)
 	skipn bglflg(plr)	;is line a goal line?
-	jrst gamlup	;nope. loop back
+	jrst gamlup		;nope. loop back
 	move a,zbestx	;get x coord of hit.
 	camle a,bglow(plr)	;test low value coordinate of boundary
 	caml a,bghigh(plr)	;test high  "
@@ -792,6 +796,7 @@ SC7:	-0.00467376557
 SC9:	0.00015148419
 	CONSTANTS
 	VARIABLES
+
 
 	subttl data bases and constants
 
@@ -815,8 +820,8 @@ pinita:	cpie.5	;initial angle,
 	cpie
 
 input:	block nplyrs	;holds inputs for each player during pass
-speed:	3.0	;points/step to move if moving
-angrat:	.03	;radians/step to turn if turning
+speed:	3.0		;points/step to move if moving
+angrat:	.03		;radians/step to turn if turning
 angspd:	4.0	;factor to scale pot*angrat by when using pots
 fuzzm:	.3	;factor for which pots are considered close enough to be zero
 fuzzr:	.3	;same thing except for rotation instead of motion
@@ -855,9 +860,9 @@ tmon:	0	;team # player is on
 	1
 
 control:	; says whether to get input from A/D pots or bits
-p1ay1:	0?0 ? 0?0 ? 0?0 ? .bp 20,input+1?.bp 100,input+1
+play1:	0?0 ? 0?0 ? 0?0 ? .bp 20,input+1?.bp 100,input+1
 play2:	0?0 ? 0?0 ? 0?0 ? .bp 20,input+1?.bp 100,input+1
-piay3:	0?0 ? 0?0 ? 0?0 ? .bp 20,input+3?.bp 100,input+3
+play3:	0?0 ? 0?0 ? 0?0 ? .bp 20,input+3?.bp 100,input+3
 play4:	0?0 ? 0?0 ? 0?0 ? .bp 20,input+3?.bp 100,input+3
 
 rotrtght==0	;symbols defined to make patching control table easy
@@ -872,7 +877,7 @@ pass==7
 ltmscr:	0	;last team that had beam when goal hit.
 lglhit:	0	;last goal hit (team # of)
 tmscor:	0	;score for team 0 (0 and 1)
-	0	;iteam 1 (2 and 3)
+	0	;team 1 (2 and 3)
 
 ztime:	30.	;# of seconds team can possess beam
 ztmlft:	0	;count of seconds left til beam possession lost
@@ -945,7 +950,7 @@ bsetup:	move a,bprot	;get protective-circle radius
 	fmpr a,a	;square it
 	movem a,bprosq	;store for use by player updat
 	move a,splen	;get player length
-	fadr a,[2.0]	;add 2 unit's for safety
+	fadr a,[2.0]	;add 2 units for safety
 	movem a,blowx	;and use that as lower limit of board
 	movem a,blowy	;in both directions.
 	fadr a,pbdgap
@@ -1091,7 +1096,7 @@ bdsiz:	0	;# words needed in board display list
 
 	; score a goal
 goalht:	move a,zbesty	;find which goal hit
-	setz b,	;assume 00 (top)
+	setz b,		;assume #0 (top)
 	camge a,bdceny	;above or below center?
 	movei b,1	;below, bottom goal (team #1)
 	movem b,lglhit	;save # of goal hit
@@ -1158,7 +1163,7 @@ inpget:	push p,a
 	datai a
 	skipe inmode
 	datai 420,a
-	setca a,a	;bits are 1's until 0 imposed.
+	setca a,a		;bits are 1's until 0 imposed.
 	movsi plr,-4
 inpgt1:	lshc a,-9.
 	lsh b,-27.
@@ -1179,7 +1184,7 @@ wait:	move a,20.	; dont wait much more than 40 microseconds
 	 jrst .-2
 
 	movsi a,-16.		; index
-	cono 574,200	; rate of 1, non-sequential, non-pack,, no intrpt
+	cono 574,200	; rate of 1, non-sequential, non-pack, no intrpt
 loop5:	skipn b,chans(a)	; get channel # form channel table
 	 jrst next
 	datao 574,b	; select channel
@@ -1234,11 +1239,11 @@ xmove==1
 ymove==2
 fire==3
 inmode:	1	;0= data switches, 1=extra switch bank 
-switches:	1	;1= use A/D or switches depending on control table
+switches: 1	;1= use A/D or switches depending on control table
 		;0= use switches in the old fashion
 
 	subttl player updating
-updat:	; update inval variables according to directions
+updat:		; update inval variables according to directions
 	move c,dconst	; digital inputs have the value dconst
 	movei e,(plr)
 	ash e,2		; 4 * player
@@ -1269,7 +1274,7 @@ loop7:	skipn b,control(a) ; does control table say to use pots?
 	ldb b,control+1(a) ; pick up bit representing opposite condition
 			;e.g. left rotate instead of right rotate..
 	trne b,1	;if its on, set inval to -(dconst)
-	movnm c,inval(e)
+	 movnm c,inval(e)
 nextsw:	addi a,2	; advance a to next control tabl entry
 	aobjn e,loop7	; advance e to next inval
 
@@ -1281,7 +1286,7 @@ updat4:	movei e,(plr)	; e gets plr*4
 	move a,inval+xmove(e)
 	movm t,a	; takes abs val
 	camg t,fuzzm	; is the value small enough to be zero?
-	setz a,		; then make it exactly zero
+	 setz a,	; then make it exactly zero
 	fmpr a,speed	; multiply by speed const
 	jfcl    	; for patching more interesting calculations
 	fadr a,plocx(plr) ; add the x position to new movment
@@ -1344,7 +1349,7 @@ updat2:	movem a,plocx(plr)	;store normalized coords
 	 jrst updat3
 	fmpr b,angrat
 	fmpr b,angspd	;scale-up for pots
-	Jfcl
+	jfcl
 	skipe switches	;if rotate was digital, us angrat
 	 skipe control(c)
 	  move b,angrat
@@ -1392,7 +1397,7 @@ plrdis:	move a,plrbri	;get standard player bri.
 	move b,plocy(plr)
 	pushj p,getpt	;get display wd for pt specified
 	andcmi c,bit2.7+bit2.6+bit2.5	;flush mode bits
-	iori c,bit2.1	;go into vector mode atfer this hwd
+	iori c,bit2.7	;go into vector mode after this hwd
 	movem c,1(t)	;store
 
 	move b,plsin(plr)
@@ -1445,7 +1450,7 @@ disrn1:	skipe d,dtloc(e)	;skip til something found(get addr of t)
 		pushj p,dtdisp	;display it
 		jrst .+1]
 	aobjn e,disrn1
-	popae p,[e,d,,c,b,a]
+	popae p,[e,d,c,b,a]
 	popj p,
 
 dtmax==3	;current max slots in random-display tables
@@ -1471,7 +1476,7 @@ dtdisp:	movem c,@vdlipt	;store paramter wd. (later, an idpb c,vdlipt)
 	pushj p,getpt	;convert a,b into point-mode word in c
 	andcmi c,bit2.5+bit2.2	;take out point-mode bit and don't intensify
 	iori c,bit2.6+bit2.5	;go into text mode after this one
-	movem C,@vdlipt	;store
+	movem c,@vdlipt	;store
 	aos vdlipt
 	movei a,440600	;get LH to turn VDLIPT
 	hrlm a,vdlipt	;into a 6-bit byte pointer.
@@ -1493,7 +1498,7 @@ dtdsp9:	movei a,37	;esc. to parameter mode
 	hrrzs vdlipt	;now clear LH of vdlipt ptr, and all's well.
 	popj p,
 
-dnum:	jumpl a,[push p,b ? movei b,55 ? idpb vdlipt ? pop p,b		;minus sign
+dnum:	jumpl a,[push p,b ? movei b,55 ? idpb b,vdlipt ? pop p,b	;minus sign
 		movn a,a	;make positive
 		jrst .+1]
 dnum1:	idivi a,10.	;base 10.
@@ -1545,7 +1550,7 @@ getvec:	push p,a
 	pop p,b
 	pop p,a
 	popj p,
-
+
 drawl:	push p,a
 	push p,b
 	push p,c
@@ -1595,7 +1600,7 @@ drawl:	push p,a
 	movm d,c	;magn.
 	idiv d,[177,,0]	;find # loops in it
 
-drw1n5:
+drwln5:
 
 
 
@@ -1653,7 +1658,7 @@ nofig:	pushj p,getvec
 	aos vdlipt
 
 	pop p,tt
-	pop P,e
+	pop p,e
 	pop p,d
 	pop p,c
 	pop p,b
@@ -1824,7 +1829,7 @@ bpbri:	20112
 
 	subttl utility subroutines and data bases
 define player num,list
-	dlplr!num==%%dp
+	dlplr!num=%%dp
 	%%dp=%%dp+5	;bright/scale wd,point wd,2 vector wds,+back to pt mode
 dwplr!num:
 relfig num,[list]
@@ -1892,7 +1897,7 @@ csncvt:	push p,a
 
 	frifix d
 	movem d,rcos
-	movnm d,nrcoS
+	movnm d,nrcos
 	fsbr b,a	;cos-sin
 	fmpr b,[.7071]
 	frifix b
@@ -1912,9 +1917,9 @@ rcs45:	0
 nrcs45:	0
 
 dpradr:	repeat nplyrs,[conc dwplr,\.rpcnt+1
-]	;addr of routine for each player that mungs dlist
+]		;addr of routine for each player that mungs dlist
 dlplst:	repeat nplyrs,[conc dlplr,\.rpcnt+1,+dpstrt
-]	;addr of first word in display list for player
+]		;addr of first word in display list for player
 
 ;routines to update player ID, given isin/icos/isin45/icos45 and x,y in c,d
 ;--all using fractional integer format.
@@ -1929,10 +1934,10 @@ player 4,[333333S111111777777U555555777777]	;double square
 DBDPT:	-DLLEN,,DLSTRT-1
 
 dlstrt:	block 500	;reserved for board
-	bit4.9	;to break out of vector mode just in case
+	bit4.9		;to break out of vector mode just in case
 dpstrt:	if1 loc .+%%dp	;reserve however many words the board needs
 	if2 repeat %%dp-., 0
-DLLEN==-DLSTRT
+DLLEN==.-DLSTRT
 	3000	;interrupt display when reach end of "fixed" d-list
 
 vdllen==500	;max size of variable-length display list
@@ -1955,7 +1960,7 @@ DSTL:	VDPTR,,[BDPT,,0]
 
 DSTL3:	BDPT,,0
 
-DISLST:	0	;PIR TO CURRENT DISLIST, SET BY DSTART.
+DISLST:	0		;PTR TO CURRENT DISLIST, SET BY DSTART.
 
 VDPTR:	0	;HOLDS BLKO FOR VDIS1
 	0	;FOR VDIS2
@@ -1967,8 +1972,8 @@ vdlipt:	0	;holds ptr into a vdlst for APR deposit of halfwords
 
 vdlapr:	0	;# of vdl that APR is munging 
 vdl340:	0	;# of vdl that 340 is munging 
-vdl1st:	0	;status of vdl 1; -1 340, 0=free waiting for 340, 1= APR
-vd12st:	0	;stat0s, for vd1 2
+vdl1st:	0	;status of vdl 1; -1 = 340, 0=free waiting for 340, 1= APR
+vdl2st:	0	;status for vd1 2
 
 vbfnum:	0	;flag for 340 routine, -1 means hacking vlist, 0 mainlist
 vdlcnt:	0	;# times display has shown list since start of use
